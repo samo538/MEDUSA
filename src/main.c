@@ -37,6 +37,11 @@
  --measure,         -m          perform measure operations at the end of the circuit;\n\
                                 optional arg is the result file (default STDOUT)\n\
  \n\
+ Options for equivalence checking:\n\
+ --eq,                          Enables equivalence checking mode (all simulation options are invalid)\n\
+ --circut1,                     specify the input QASM file of the first circuit\n\
+ --circuit2,                    specify the input QASM file of the second circuit (will be inverted)\n\
+ \n\
  The MTBDD result is saved in the file 'res.dot'.\n\
  The evaluation of variables for large numbers is saved (if necessary) in 'res-vars.txt'.\n"
 
@@ -74,19 +79,25 @@ int main(int argc, char *argv[])
 
     bool use_tree_sim = false;
 
-    
+    bool is_equivalence = false;
+    FILE *circuit1;
+    FILE *circuit2;
+
     int opt;
     static struct option long_options[] = {
-        {"help",     no_argument,        0, 'h'},
-        {"info",     no_argument,        0, 'i'},
-        {"file",     required_argument,  0, 'f'},
-        {"measure",  optional_argument,  0, 'm'},
-        {"nsamples", required_argument,  0, 'n'},
-        {"symbolic", no_argument,        0, 's'},
-        {"probability", no_argument,     0, 'p'},
+        {"help",     no_argument,         0, 'h'},
+        {"info",     no_argument,         0, 'i'},
+        {"file",     required_argument,   0, 'f'},
+        {"measure",  optional_argument,   0, 'm'},
+        {"nsamples", required_argument,   0, 'n'},
+        {"symbolic", no_argument,         0, 's'},
+        {"probability", no_argument,      0, 'p'},
         {"norm-csv",   required_argument, 0, 'c'},
         {"tree-simulation", no_argument,  0, 't'},
         {"norm-error", no_argument,       0, 'e'},
+        {"eq", no_argument,               0, 'x'},
+        {"circuit1", no_argument,         0, 'y'},
+        {"circuit2", no_argument,         0, 'z'},
 
         {0, 0, 0, 0}
     };
@@ -139,11 +150,32 @@ int main(int argc, char *argv[])
             case 't':
                 use_tree_sim = true;
                 break;
+            case 'x':
+                is_equivalence = true;
+                break;
+            case 'y':
+                input = fopen(optarg, "r");
+                if (input == NULL) {
+                    error_exit("Invalid input file '%s'.\n", optarg);
+                }
+                break;
+            case 'z':
+                input = fopen(optarg, "r");
+                if (input == NULL) {
+                    error_exit("Invalid input file '%s'.\n", optarg);
+                }
+                break;
 
             case '?':
                 exit(1); // error msg already printed by getopt_long
         }
     }
+
+    if (is_equivalence) {
+        // TODO: main simulation body
+    }
+
+    // TODO: restructure the rest of this code so eq and sim are more separated
 
     // Init:
     medusa_dbg_init();
